@@ -68,6 +68,9 @@ pub struct Runtime<'e> {
     pub enable_alt_screen: bool,
     /// Set the target number of frames to render per second.
     pub fps: u8,
+
+    pub stop: Option<Box<dyn Fn() -> bool>>,
+
     screen: Screen,
     output: Stdout,
     constraints: Constraints,
@@ -111,6 +114,8 @@ impl<'e> Runtime<'e> {
             tabindex: TabIndexing::new(),
             enable_ctrlc: true,
             enable_tabindex: false,
+
+            stop: None,
         };
 
         Ok(inst)
@@ -229,6 +234,12 @@ impl<'e> Runtime<'e> {
         let sleep_micros = ((1.0 / self.fps as f64) * 1000.0 * 1000.0) as u128;
 
         'run: loop {
+            if let Some(stop) = &self.stop {
+                if (stop)() {
+                    break 'run Ok(());
+                }
+            }
+
             while let Some(event) = self.events.poll(Duration::from_millis(1)) {
                 let event = self.global_event(event);
 
