@@ -12,6 +12,12 @@ pub struct List<T> {
     subscribers: RefCell<Vec<NodeId>>,
 }
 
+impl<T> Default for List<T> {
+    fn default() -> Self {
+        Self::empty()
+    }
+}
+
 impl<T> List<T> {
     pub fn empty() -> Self {
         Self::new(vec![])
