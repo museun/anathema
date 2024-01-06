@@ -65,11 +65,11 @@ pub struct Templates {
 }
 
 impl Templates {
-    pub fn new(root: String, view: impl View + Send + 'static) -> Self {
+    pub fn new(root: impl ToString, view: impl View + Send + 'static) -> Self {
         let view_templates = ViewTemplates::new();
         RegisteredViews::add_view(view_templates.view_ids.root_id(), view);
         Self {
-            root,
+            root: root.to_string(),
             view_templates,
         }
     }
