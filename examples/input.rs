@@ -8,6 +8,7 @@ use anathema::core::{Event, KeyCode, Nodes, View};
 use anathema::runtime::Runtime;
 use anathema::values::{List, State, StateValue};
 use anathema::vm::Templates;
+use anathema_runtime::RuntimeOptions;
 
 #[derive(Debug, State)]
 struct RootState {
@@ -54,8 +55,14 @@ fn main() {
     let templates = templates.compile().unwrap();
 
     // Step three: setup runtime
-    let mut runtime = Runtime::new(&templates).unwrap();
-    runtime.enable_tabindex = false;
+    let mut runtime = Runtime::new(
+        &templates,
+        RuntimeOptions {
+            enable_tabindex: false,
+            ..Default::default()
+        },
+    )
+    .unwrap();
 
     // Disable the alt screen if the application panics
     // and you want to see the panic message.

@@ -11,6 +11,7 @@ use anathema::core::View;
 use anathema::runtime::Runtime;
 use anathema::values::{List, State, StateValue};
 use anathema::vm::Templates;
+use anathema_runtime::RuntimeOptions;
 
 // -----------------------------------------------------------------------------
 //   - Root -
@@ -92,7 +93,7 @@ fn main() {
     // -----------------------------------------------------------------------------
     //   - Runtime -
     // -----------------------------------------------------------------------------
-    let runtime = Runtime::new(&templates).unwrap();
+    let runtime = Runtime::new(&templates, RuntimeOptions::default()).unwrap();
 
     // -----------------------------------------------------------------------------
     //   - Start -

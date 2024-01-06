@@ -22,6 +22,53 @@ extern crate anathema_values as anathema;
 mod meta;
 mod tabindex;
 
+pub struct RuntimeOptions {
+    /// Enable meta information such as frame timing, screen size and widget count.
+    /// ```text
+    /// // Meta information available in the template:
+    /// _size.width
+    /// _size.height
+    /// _timings: Timings
+    /// _timings.layout
+    /// _timings.position
+    /// _timings.paint
+    /// _timings.render
+    /// _timings.total
+    /// _count
+    /// ```
+    pub enable_meta: bool,
+    /// Enable mouse support on terminals that supports it
+    pub enable_mouse: bool,
+    /// This captures the ctrl+c command and terminates the runtime.
+    pub enable_ctrlc: bool,
+    /// Enable tab indices.
+    /// If this is set to false, the root view will receive all events,
+    /// if this is set to true, only views with a given tab index will receive
+    /// events.
+    ///
+    /// The root view will never have a tab index
+    pub enable_tabindex: bool,
+    /// This will create an alternate screen and render to this screen.
+    /// This retains the old content of the terminal and restores it once the
+    /// runtime terminates.
+    pub enable_alt_screen: bool,
+    /// Set the target number of frames to render per second.
+    pub fps: u8,
+}
+
+impl Default for RuntimeOptions {
+    fn default() -> Self {
+        Self {
+            enable_meta: false,
+            enable_mouse: false,
+            enable_ctrlc: true,
+            enable_tabindex: false,
+            enable_alt_screen: true,
+            fps: 30,
+        }
+    }
+}
+
 /// The runtime handles events, tab indices and configuration of the display
 ///
 /// ```
@@ -68,6 +115,7 @@ pub struct Runtime<'e> {
     pub enable_alt_screen: bool,
     /// Set the target number of frames to render per second.
     pub fps: u8,
+
     screen: Screen,
     output: Stdout,
     constraints: Constraints,
@@ -86,7 +134,7 @@ impl<'e> Drop for Runtime<'e> {
 
 impl<'e> Runtime<'e> {
     /// Create a new runtime.
-    pub fn new(templates: &'e CompiledTemplates) -> Result<Self> {
+    pub fn new(templates: &'e CompiledTemplates, options: RuntimeOptions) -> Result<Self> {
         let expressions = templates.expressions();
         register_default_widgets()?;
 
@@ -96,21 +144,30 @@ impl<'e> Runtime<'e> {
         let constraints = Constraints::new(Some(size.width), Some(size.height));
         let screen = Screen::new(size);
 
+        let RuntimeOptions {
+            enable_meta,
+            enable_mouse,
+            enable_ctrlc,
+            enable_tabindex,
+            enable_alt_screen,
+            fps,
+        } = options;
+
         let inst = Self {
             output: stdout(),
             screen,
             constraints,
             nodes,
-            enable_meta: false,
-            enable_mouse: false,
-            enable_alt_screen: true,
+            enable_meta,
+            enable_mouse,
+            enable_alt_screen,
             events: Events,
-            fps: 30,
+            fps,
             needs_layout: true,
             meta: meta::Meta::new(size.width, size.height),
             tabindex: TabIndexing::new(),
-            enable_ctrlc: true,
-            enable_tabindex: false,
+            enable_ctrlc,
+            enable_tabindex,
         };
 
         Ok(inst)
