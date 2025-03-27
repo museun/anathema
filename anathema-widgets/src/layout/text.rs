@@ -181,6 +181,10 @@ impl Strings {
         ProcessResult::Continue
     }
 
+    pub fn line_count(&self) -> usize {
+        self.lines.split(|e| *e == LineEntry::Newline).count()
+    }
+
     /// Access the laid out strings.
     /// See [`Strings`] for example.
     pub fn lines(&self) -> impl Iterator<Item = Line<impl Iterator<Item = Segment<'_>>>> {
